@@ -339,7 +339,7 @@ for SET = 1:length(image_sets);
         end
     end
 end
-
+%%
 %get the median number of fixations and saccades across all monkeys and sets
 mediannumfix = round(median(mediannumfix)); 
 mediannumsac = round(median(mediannumsac));
@@ -1055,8 +1055,9 @@ imageX = 800; imageY = 600;
 plotoptions.runs = 'none'; %all/none
 plotoptions.probdens = 'none';
 plotoptions.type = 'sal'; %sal/image
-IOR_taus = [1 1/3 1/7 1/12 1/17 1/25 1/35 1/50 0];
-for SET = 7:length(image_sets);
+% IOR_taus = [1 1/3 1/7 1/12 1/17 1/25 1/35 1/50 0];
+IOR_taus = 1/17;
+for SET = 1:length(image_sets);
     SETNUM = image_sets{SET};
     cd([scm_image_dir SETNUM])
     
@@ -1078,8 +1079,9 @@ for SET = 7:length(image_sets);
     for i = 1:length(saliencemapfiles)
         for t = 1:length(tags)
             for it = 1:length(IOR_taus)
-            disp(['Running ' tags{t} ' on image #' num2str(i) ' from ' image_sets{SET} ' IOR_tau ' num2str(IOR_taus(it))])
-            run_BCRWCF(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it))
+                disp(['Running ' tags{t} ' on image #' num2str(i) ' from ' image_sets{SET} ' IOR_tau ' num2str(IOR_taus(it))])
+                run_BCRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) 
+                run_CRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) % same code but no saliene bias
             end
         end
     end
