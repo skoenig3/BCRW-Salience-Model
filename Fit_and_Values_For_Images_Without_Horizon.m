@@ -10,7 +10,7 @@ load([data_dir 'Combined-ROC-Corrected-ImageI.mat']);
 %load KL divergence analysis data
 load([data_dir 'Combined-KL-DiveregenceTest-CorrectedImgI.mat']);
 
-threshold = 1/4*imageY;
+threshold = 1/3*imageY;
 
 %col 1 no horizon, col 2 with horizon  > 1/3 of image
 ROC_values = cell(1,2);
@@ -26,32 +26,32 @@ tags = {'MP','TT','JN','IW'};
 
 minlen = 35; %median number of fixations according to viewing behavior section. 
 
-% %% manually determine which images contain a lot of sky
-% all_horizons = cell(1,length(image_sets));
-% for SET = 1:length(image_sets);
-%     SETNUM = image_sets{SET};
-%     cd([scm_image_dir SETNUM])
-% 
-%     horizon = zeros(1,36);
-%     for img = 1:36
-%         imag = imread([num2str(img) '.bmp']);
-%         
-%         imshow(imag);
-%         hold on
-%         plot([0 800],[threshold threshold],'r--')
-%         hold off
-%         reply = input('Does image contain horizon below threshold [y,n]');
-%         if strcmpi(reply,'y') || reply == 1
-%             horizon(img) = 1;
-%         end
-%         
-%     end
-%     
-%     all_horizons{SET} = horizon;
-%     
-% end
-%save([data_dir 'all_horizons.mat','all_horizons','threshold'])
-%% Calculate the image intesnity, salience and fixation maps for images wiht and without horizons
+%manually determine which images contain a lot of sky
+all_horizons = cell(1,length(image_sets));
+for SET = 1:length(image_sets);
+    SETNUM = image_sets{SET};
+    cd([scm_image_dir SETNUM])
+
+    horizon = zeros(1,36);
+    for img = 1:36
+        imag = imread([num2str(img) '.bmp']);
+        
+        imshow(imag);
+        hold on
+        plot([0 800],[threshold threshold],'r--')
+        hold off
+        reply = input('Does image contain horizon below threshold [y,n]');
+        if strcmpi(reply,'y') || reply == 1
+            horizon(img) = 1;
+        end
+        
+    end
+    
+    all_horizons{SET} = horizon;
+    
+end
+save([data_dir 'all_horizons.mat','all_horizons','threshold'])
+%% Calculate the image intesnity, salience and fixation maps for images with and without horizons
 
 load([data_dir 'all_horizons.mat'],'all_horizons')
 horizon_imageintensities = zeros(imageY,imageX);
@@ -85,6 +85,8 @@ for imset = 1:length(image_sets);
     for i = 1:36
         
           img = double(rgb2gray(imread([num2str(i) '.bmp'])))+1; %values from 0-255 now 1-256
+          img = img-min(min(img)); %zero
+          img = img/max(max(img)); %scale to 1
           
           load([num2str(i) '-saliencemap.mat'])
           if any(any(isnan(fullmap)))
@@ -102,7 +104,11 @@ for imset = 1:length(image_sets);
           for t = 1:length(tags)
               if eyedatafiles(t) ~= 0;
                   
-                  load(['BCRW IOR TAU 17\' tags{t} '-' num2str(i) '-BCRW.mat'],'fixations')
+                  try
+                      load(['BCRW IOR TAU 17\' tags{t} '-' num2str(i) '-BCRW.mat'],'fixations')
+                  catch
+                      continue
+                  end
                   
                   if all_horizons{imset}(i) == 1 %has a horizon
                       horizon_BCRW = horizon_BCRW+fixations;

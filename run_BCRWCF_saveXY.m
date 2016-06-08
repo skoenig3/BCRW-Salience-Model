@@ -140,12 +140,11 @@ for n = 1:nn;
     %select a random fixation duration
     fixdur = find(rand <= fixdurationCDF);
     fixdur = fixdur(1);
-    fixdur(fixdur < 5) = 5;    
+    fixdur(fixdur < 5) = 5;
     timewarp = round(linspace(1,size(fixdistance,2),fixdur));
     %fixation "amplitude" and persistence are controleld over time as well
     fixdist = fixdistance(:,timewarp);
     perfix = persistence.fix(timewarp);
-    
     fxx = fx;
     fyy = fy;
     C = sqrt((rr-x).^2+(cc-y).^2)<=IOR_area;
@@ -155,20 +154,7 @@ for n = 1:nn;
     sacind = 1;
     fixind = [];
     while t < trialtime
-        if round(tmr*1/dt)+1 <= sacdur;
-            dhr = find(sacdist(:,round(tmr*1/dt)+1) >= rand);
-            dh = dhr(1);
-            b = persac(round(tmr*1/dt)+1)/2;
-            sacind = round(tmr*1/dt)+1;
-            fixind = round(tmr*1/dt)+1+1;
-        else
-            dhr = find(fixdist(:,round(tmr*1/dt)-sacdur+1) >= rand);
-            dh = dhr(1);
-            b = perfix(round(tmr*1/dt)-sacdur+1);
-            fixind = round(tmr*1/dt)+1;
-        end
-        if round(tmr*1/dt)+1 == sacdur + fixdur
-            fixind = fixind-1; %remove previously added index since end fixation
+        if round(tmr*1/dt)+1 == (sacdur + fixdur+1) %end fixation period so reset model
             xy = ceil(mean(xxyy(:,1:5),2));
             if strcmpi(plotoptions.runs,'all')
                 plot(xy(1),xy(2),'*k','markersize',6)
@@ -183,18 +169,8 @@ for n = 1:nn;
             else
                 fixationstats{n}.saccadetimes = [fixationstats{n}.saccadetimes [1 sacind]'+fixationstats{n}.fixationtimes(2,end)];
                 fixationstats{n}.fixationtimes = [fixationstats{n}.fixationtimes [1 fixind-sacind]'+fixationstats{n}.saccadetimes(2,end)];
-                
-                if  fixationstats{n}.fixationtimes(2,end) > 2001
-                    disp('WTF')
-                end
-                    
             end
-            
-            distance_btwn_fixations = sqrt((previous_fixations(1,end)-xy(1)).^2+...
-                (previous_fixations(2,end)-xy(2)).^2);
-%             if distance_btwn_fixations < 48
-%                 disp('What')
-%             end
+
             if IOR_tau > 0;
                 xyp = previous_fixations(:,1);
                 C = sqrt((rr-xyp(1)).^2+(cc-xyp(2)).^2)<=IOR_area;
@@ -213,11 +189,13 @@ for n = 1:nn;
             
             sacdur = find(rand <= sacdurationCDF);
             sacdur = sacdur(1);
+            sacdur(sacdur < 2) = 2;
             timewarp = round(linspace(1,sacend,sacdur));
             sacdist = sacdistance(:,timewarp);
             persac = persistence.sac(timewarp);
             fixdur = find(rand <= fixdurationCDF);
             fixdur = fixdur(1);
+            fixdur(fixdur < 5) = 5;
             timewarp = round(linspace(1,size(fixdistance,2),fixdur));
             fixdist = fixdistance(:,timewarp);
             perfix = persistence.fix(timewarp);
@@ -225,7 +203,19 @@ for n = 1:nn;
             sacind = round(tmr*1/dt)+1;
             fixind = [];
         end
-        if tmr == 0;  %just starting this simuliation
+        if round(tmr*1/dt)+1 <= sacdur;
+            dhr = find(sacdist(:,round(tmr*1/dt)+1) >= rand);
+            dh = dhr(1);
+            b = persac(round(tmr*1/dt)+1)/2;
+            sacind = round(tmr*1/dt)+1;
+            fixind = round(tmr*1/dt)+1+1;
+        else
+            dhr = find(fixdist(:,round(tmr*1/dt)-sacdur+1) >= rand);
+            dh = dhr(1);
+            b = perfix(round(tmr*1/dt)-sacdur+1);
+            fixind = round(tmr*1/dt)+1;
+        end
+        if tmr == 0; %just starting this simuliation
             angr = find(sacangleCDF >= rand);
             ang = nang(angr(1));
         else
@@ -364,7 +354,7 @@ save([BCRWfolder tagname '-' saliencemapfile(1:dash-1) '-BCRW.mat'],'alltrials',
         %         end
     end
     function [xn,yn,angold] = border2(x,xn,y,yn,dh,imageX,imageY,dt,tmr,sacdur,...
-            border_sacdis0t,border_buffer)
+            border_sacdist,border_buffer)
         xx = [x xn]; yy = [y yn];
         p = polyfit([x xn],[y yn],1);
         if xn > imageX

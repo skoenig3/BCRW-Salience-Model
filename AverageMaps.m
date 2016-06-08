@@ -11,6 +11,7 @@ allsalience = zeros(imageY,imageX);
 allfixations = zeros(imageY,imageX);
 imageintensities = zeros(imageY,imageX);
 allBCRW = zeros(imageY,imageX);
+allCRW = zeros(imageY,imageX);
 for imset = 1:length(image_sets);
     dirName = [scm_image_dir image_sets{imset}];
     disp(['Image set-' num2str(image_sets{imset})])
@@ -36,13 +37,17 @@ for imset = 1:length(image_sets);
         end
         
         img = double(rgb2gray(imread([num2str(i) '.bmp'])))+1; %values from 0-255 now 1-256
+        img = img-min(min(img)); %zero
+        img = img/max(max(img)); %scale to 1
         imageintensities = imageintensities+img;
         for t = 1:length(tags)
             if eyedatafiles(t) ~= 0;
                 
                 load(['BCRW IOR TAU 17\' tags{t} '-' num2str(i) '-BCRW.mat'],'fixations')
                 allBCRW = allBCRW+fixations;
-               
+                                
+                load(['CRW IOR TAU 17\' tags{t} '-' num2str(i) '-CRW.mat'],'fixations')
+                allCRW = allCRW+fixations;
                 
                 load(matfiles.mat{eyedatafiles(t)})
                 fixations = fixationstats{i*2-1}.fixations;
@@ -68,3 +73,4 @@ end
 %%
 allfixations = imfilter(allfixations,f);
 allBCRW = imfilter(allBCRW,f);
+allCRW = imfilter(allCRW,f);
