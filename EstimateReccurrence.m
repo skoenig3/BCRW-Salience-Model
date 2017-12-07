@@ -64,12 +64,16 @@ for SET = 1:length(image_sets);
     end
 end
 %%
-figure
-imagesc(all_recurence_map(end:-1:1,:))
-xlabel('Ordinal Fixation Number')
-ylabel('Ordinal Fixation Number')
-
 rm = all_recurence_map;
+for r = 1:length(rm);
+     for i = 1:r-1
+        rm(r,i) = rm(r,i)/rm(r,r);
+        rm(i,r) = rm(i,r)/rm(r,r);
+     end
+     rm(r,r) = 1;
+end
+rm = rm(1:35,1:35);
+
 rm(find(eye(size(rm)))) = 0;
 figure
 imagesc(rm(end:-1:1,:))
@@ -77,11 +81,11 @@ xlabel('Ordinal Fixation Number')
 ylabel('Ordinal Fixation Number')
 %% remove central diagonals
 id = eye(size(rm));
-id = [id(2:end,:); zeros(1,50)];
+id = [id(2:end,:); zeros(1,35)];
 rm(find(id)) = 0;
 
 id = eye(size(rm));
-id = [zeros(1,50);id(1:end-1,:)];
+id = [zeros(1,35);id(1:end-1,:)];
 rm(find(id)) = 0;
 imagesc(rm(end:-1:1,:))
 xlabel('Ordinal Fixation Number')
@@ -89,18 +93,20 @@ ylabel('Ordinal Fixation Number')
 %%
 
 id = eye(size(rm));
-id = [id(3:end,:); zeros(2,50)];
+id = [id(3:end,:); zeros(2,35)];
 rm(find(id)) = 0;
 
 id = eye(size(rm));
-id = [zeros(2,50);id(1:end-2,:)];
+id = [zeros(2,35);id(1:end-2,:)];
 rm(find(id)) = 0;
 imagesc(rm(end:-1:1,:))
 xlabel('Ordinal Fixation Number')
 ylabel('Ordinal Fixation Number')
-xlim([0.5 35.5]) %only care about the 1st 35 fixations
-ylim([15.5 50.5])
+% xlim([0.5 35.5]) %only care about the 1st 35 fixations
+% ylim([15.5 50.5])
 axis square
+
+
 %%
 figure
 hist(recurence_measure,100);

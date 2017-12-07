@@ -86,7 +86,7 @@ saliencemap = imfilter(saliencemap,filt);
 [fx,fy] = gradient(saliencemap);
 
 %---Parameters determined using a Parameter Sweep---%
-% IOT_tau = 1/17; %1/17 recovery time of IOR
+% IOR_tau = 1/17; %1/17 recovery time of IOR
 IOR_area = 48; % area of visual space affected by IOR
 border_buffer = 24;
 border_sacdist = 48; %original run was 48
@@ -320,8 +320,12 @@ end
 if ~exist(BCRWfolder,'dir')
     mkdir(BCRWfolder)
 end
+% BCRWfolder = 'BCRW IOR TAU Simulations\';
+% if ~exist(BCRWfolder,'dir')
+%     mkdir(BCRWfolder)
+% end
 
-save([BCRWfolder tagname '-' saliencemapfile(1:dash-1) '-BCRW.mat'],'alltrials',...
+save([BCRWfolder tagname '-' saliencemapfile(1:dash-1) '-' num2str(IOR_tau) '-BCRW.mat'],'alltrials',...
     'fixations','fixationorder','fixationtimes','IOR_tau','fixationstats')
 
     function   [dh,ang] = border1(dh,x,y,imageX,imageY,dt,tmr,sacdur,...

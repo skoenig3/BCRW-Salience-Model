@@ -1055,8 +1055,8 @@ imageX = 800; imageY = 600;
 plotoptions.runs = 'none'; %all/none
 plotoptions.probdens = 'none';
 plotoptions.type = 'sal'; %sal/image
-% IOR_taus = [1 1/3 1/7 1/12 1/17 1/25 1/35 1/50 0];
-IOR_taus = 1/17;
+IOR_taus = [1 1/3 1/5 1/7 1/9 1/12 1/14 1/17 1/20 1/25 1/30 1/35 0];
+%IOR_taus = 1/17;
 for SET = 1:length(image_sets);
     SETNUM = image_sets{SET};
     cd([scm_image_dir SETNUM])
@@ -1080,8 +1080,9 @@ for SET = 1:length(image_sets);
         for t = 1:length(tags)
             for it = 1:length(IOR_taus)
                 disp(['Running ' tags{t} ' on image #' num2str(i) ' from ' image_sets{SET} ' IOR_tau ' num2str(IOR_taus(it))])
-                run_BCRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) 
-                run_CRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) % same code but no saliene bias
+                %run_BCRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) 
+                %run_CRWCF_saveXY(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,plotoptions,IOR_taus(it)) % same code but no saliene bias
+                run_BCRWCF_Saccadic_Momentum(allview{t},matfiles.mat{saliencemapfiles(i)},tags{t},imageX,imageY,IOR_taus(it)) 
             end
         end
     end
@@ -1419,21 +1420,21 @@ for i = 1:size(combinedROC,1)
     zpvalues(i) = p;
     text(i,mean(combinedROC(i,:))+0.05,['p = ' num2str(p,'%1.1e\n')],'HorizontalAlignment','center')
     if i == 1
-        [~,p] = ttest2(combinedROC(1,:),combinedROC(2,:));
+        [~,p] = kstest2(combinedROC(1,:),combinedROC(2,:));
         tpvalues(i) = p;
         plot([1.1 1.1],[.77 .8],'k')
         plot([1.9 1.9],[.77 .8],'k')
         plot([1.1 1.9],[.8 .8],'k')
         text(1.45,.8,['p = ' num2str(p,'%1.1e\n')],'HorizontalAlignment','center')
     elseif i == 2
-        [~,p] = ttest2(combinedROC(2,:),combinedROC(3,:));
+        [~,p] = kstest2(combinedROC(2,:),combinedROC(3,:));
         tpvalues(i) = p;
         plot([2.1 2.1],[.77 .8],'k')
         plot([2.9 2.9],[.77 .8],'k')
         plot([2.1 2.9],[.8 .8],'k')
         text(2.45,.8,['p = ' num2str(p,'%1.1e\n')],'HorizontalAlignment','center')
     elseif i == 3
-        [~,p] = ttest2(combinedROC(1,:),combinedROC(3,:));
+        [~,p] = kstest2(combinedROC(1,:),combinedROC(3,:));
         tpvalues(i) = p;
         plot([1 1],[.83 .86],'k')
         plot([3 3],[.83 .86],'k')
